@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Dashboard | ECE PTU</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/main.css">
+  <!-- Chart.js for pie/bar charts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    .privacy-banner {
+      background: rgba(0,212,255,0.06);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-size: 0.82rem;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .rating-summary {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .big-rating {
+      font-family: var(--font-mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      min-width: 80px;
+    }
+    .rating-bars { flex: 1; }
+    .rating-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .rating-bar-track {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border-radius: 20px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .rating-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-gold), #ffaa00);
+      border-radius: 20px;
+      transition: width 0.6s ease;
+    }
+    .rating-star-row { display: flex; gap: 0.3rem; }
+    .rating-star { color: var(--accent-gold); font-size: 1.2rem; }
+    .rating-star.empty { color: rgba(255,255,255,0.15); }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .chart-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .chart-box h4 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+    }
+    .response-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .anon-id-tag {
+      display: inline-block;
+      background: rgba(0,212,255,0.1);
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+      letter-spacing: 1px;
+    }
+    canvas { max-height: 260px; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-brand">
+    <div class="brand-icon">⚡</div>
+    <div>
+      <div class="brand-title">ECE Feedback</div>
+      <div class="brand-sub">Punjab Technical University</div>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="admin.html" class="nav-btn btn-admin">Admin</a></li>
+    <li><a href="student.html" class="nav-btn btn-student">Student Access</a></li>
+    <li><a href="teacher.html" class="nav-btn btn-teacher">Teacher Dashboard</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-box">
+    <div class="modal-icon">📊</div>
+    <div class="modal-title" style="color:var(--accent-cyan);">TEACHER LOGIN</div>
+    <div class="modal-sub">FEEDBACK ANALYTICS DASHBOARD</div>
+    <div class="form-group">
+      <label>TEACHER PASSWORD</label>
+      <input type="password" id="teacherPass" placeholder="Enter teacher password"/>
+    </div>
+    <button class="btn-submit btn-teacher-submit" onclick="doTeacherLogin()">VIEW DASHBOARD</button>
+    <div class="error-msg" id="loginErr">Incorrect teacher password.</div>
+    <div style="text-align:center;margin-top:1.5rem;">
+      <a href="../../index.html" style="color:var(--text-muted);font-size:0.8rem;font-family:var(--font-mono);">← Back to Home</a>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard" style="display:none;">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title" style="color:var(--accent-cyan);">📊 TEACHER ANALYTICS DASHBOARD</div>
+      <div style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono);margin-top:0.25rem;">
+        ECE Department • PTU • <span id="lastUpdated">—</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;">
+      <button class="btn-action btn-cyan" onclick="loadDashboard()" style="border:none;cursor:pointer;">🔄 REFRESH</button>
+      <button class="btn-action btn-red" onclick="doLogout()" style="border:none;cursor:pointer;">LOGOUT</button>
+    </div>
+  </div>
+
+  <div class="dash-body">
+
+    <!-- PRIVACY NOTICE -->
+    <div class="privacy-banner">
+      <div style="font-size:1.3rem;">🔒</div>
+      <div>
+        <strong>PRIVACY PROTECTED VIEW</strong> — Student names, roll numbers, and identifying information are fully anonymized.
+        You are viewing aggregated analytics only. Identities are accessible only to the Admin.
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-card-num" id="t-total">0</span>
+        <span class="stat-card-label">Responses Received</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-num" id="t-max">30</span>
+        <span class="stat-card-label">Max Responses</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-num" id="t-avg">0.0</span>
+        <span class="stat-card-label">Avg Rating (1–5)</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-num" id="t-pct">0%</span>
+        <span class="stat-card-label">Positive Feedback</span>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="chart-grid">
+      <!-- Rating Distribution Pie -->
+      <div class="chart-box">
+        <h4>⭐ OVERALL RATING DISTRIBUTION</h4>
+        <canvas id="ratingPieChart"></canvas>
+      </div>
+
+      <!-- Q1 Bar Chart -->
+      <div class="chart-box">
+        <h4>📊 TEACHING QUALITY RATINGS</h4>
+        <canvas id="q1BarChart"></canvas>
+      </div>
+
+      <!-- MCQ Distribution -->
+      <div class="chart-box">
+        <h4>🔘 PUNCTUALITY RESPONSES</h4>
+        <canvas id="punctualityChart"></canvas>
+      </div>
+
+      <!-- Interaction Chart -->
+      <div class="chart-box">
+        <h4>💬 STUDENT INTERACTION RATINGS</h4>
+        <canvas id="interactionChart"></canvas>
+      </div>
+    </div>
+
+    <!-- RATING BREAKDOWN PER QUESTION -->
+    <div class="panel" style="margin-bottom:1.5rem;">
+      <div class="panel-title">Per-Question Rating Breakdown</div>
+      <div id="ratingBreakdown">
+        <div class="loading"><div class="spinner"></div>Loading analytics...</div>
+      </div>
+    </div>
+
+    <!-- YES/NO SUMMARY -->
+    <div class="panel" style="margin-bottom:1.5rem;">
+      <div class="panel-title">Yes / No Question Summary</div>
+      <div id="yesNoSummary">
+        <div class="loading"><div class="spinner"></div>Loading...</div>
+      </div>
+    </div>
+
+    <!-- ANONYMOUS TEXT RESPONSES -->
+    <div class="panel">
+      <div class="panel-title">Anonymous Text Responses</div>
+      <p style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:1.25rem;">
+        ANON IDs are random tokens generated at submission. They do NOT identify the student.
+      </p>
+      <div id="textResponses">
+        <div class="loading"><div class="spinner"></div>Loading text responses...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="admin.html">Admin</a>
+  <a href="student.html">Student Access</a>
+  <a href="teacher.html">Teacher Dashboard</a>
+</div>
+
+<script src="../utils/config.js"></script>
+<script src="../utils/api.js"></script>
+<script>
+let teacherKey = null;
+let charts = {};
+
+window.addEventListener('DOMContentLoaded', () => {
+  const stored = Session.get(CONFIG.SESSION.TEACHER);
+  if (stored) { teacherKey = stored; showDashboard(); }
+  window.addEventListener('scroll', () =>
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50));
+  document.getElementById('hamburger').addEventListener('click', () =>
+    document.getElementById('mobileMenu').classList.toggle('open'));
+  document.getElementById('teacherPass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doTeacherLogin();
+  });
+});
+
+async function doTeacherLogin() {
+  const pass = document.getElementById('teacherPass').value;
+  if (!pass) return;
+  try {
+    const res = await API.login('teacher', pass);
+    if (res.success) {
+      teacherKey = res.token || pass;
+      Session.set(CONFIG.SESSION.TEACHER, teacherKey);
+      showDashboard();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  } catch {
+    if (pass === CONFIG.PASSWORDS.teacher) {
+      teacherKey = pass;
+      Session.set(CONFIG.SESSION.TEACHER, teacherKey);
+      showDashboard();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  }
+}
+
+function doLogout() {
+  Session.clear(CONFIG.SESSION.TEACHER);
+  teacherKey = null;
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginModal').style.display = 'flex';
+}
+
+async function showDashboard() {
+  document.getElementById('loginModal').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  await loadDashboard();
+}
+
+async function loadDashboard() {
+  try {
+    const data = await API.getFeedbackResults(teacherKey);
+    renderDashboard(data);
+  } catch {
+    renderDashboard(getDemoData());
+    showToast('Backend not connected — showing demo data', 'info');
+  }
+  document.getElementById('lastUpdated').textContent =
+    'Updated: ' + new Date().toLocaleTimeString('en-IN');
+}
+
+function getDemoData() {
+  return {
+    total: 18,
+    maxResponses: 30,
+    avgRating: 4.1,
+    positivePct: 78,
+    ratingDistribution: { 1: 1, 2: 2, 3: 3, 4: 7, 5: 5 },
+    q1: { label: 'Teaching Quality', avg: 4.2, dist: { 1:0, 2:1, 3:3, 4:8, 5:6 } },
+    q2: { label: 'Content Clarity', avg: 4.0, dist: { 1:1, 2:1, 3:4, 4:7, 5:5 } },
+    q3: { label: 'Punctuality', avg: 3.9, dist: { 1:1, 2:2, 3:4, 4:6, 5:5 } },
+    punctuality: { 'Always (95–100%)': 8, 'Usually (75–95%)': 6, 'Sometimes (50–75%)': 3, 'Rarely (below 50%)': 1 },
+    interaction: { 'Excellent': 7, 'Good': 6, 'Average': 3, 'Poor': 2 },
+    yesNo: [
+      { question: 'Does the teacher encourage questions?', yes: 14, no: 4 },
+      { question: 'Would you recommend this teacher?', yes: 15, no: 3 }
+    ],
+    textResponses: [
+      { anonymousId: 'ANON_A3K', q: 'Key strengths?', a: 'Very good command over subject matter. Explains concepts with practical examples.' },
+      { anonymousId: 'ANON_B7M', q: 'Key strengths?', a: 'Always available after class for doubt clearing. Very approachable.' },
+      { anonymousId: 'ANON_C2P', q: 'Improvements?', a: 'More hands-on lab sessions and practical demos would be great.' },
+      { anonymousId: 'ANON_D9Q', q: 'Improvements?', a: 'Notes should be provided before class so we can come prepared.' },
+      { anonymousId: 'ANON_E5R', q: 'Key strengths?', a: 'Clear explanations with board diagrams are very helpful.' }
+    ]
+  };
+}
+
+function renderDashboard(data) {
+  document.getElementById('t-total').textContent = data.total;
+  document.getElementById('t-max').textContent = data.maxResponses;
+  document.getElementById('t-avg').textContent = data.avgRating?.toFixed(1) || '0.0';
+  document.getElementById('t-pct').textContent = (data.positivePct || 0) + '%';
+
+  renderCharts(data);
+  renderRatingBreakdown(data);
+  renderYesNo(data.yesNo);
+  renderTextResponses(data.textResponses);
+}
+
+const CHART_COLORS = {
+  cyan: 'rgba(0,212,255,0.8)',
+  green: 'rgba(0,255,136,0.8)',
+  purple: 'rgba(124,58,237,0.8)',
+  orange: 'rgba(255,107,53,0.8)',
+  gold: 'rgba(255,215,0,0.8)',
+  red: 'rgba(255,68,68,0.8)',
+  blue: 'rgba(66,153,225,0.8)',
+  teal: 'rgba(56,178,172,0.8)'
+};
+const BORDER_COLORS = Object.fromEntries(
+  Object.entries(CHART_COLORS).map(([k,v]) => [k, v.replace('0.8','1')])
+);
+
+Chart.defaults.color = '#8ab4c9';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+function renderCharts(data) {
+  // Rating Pie
+  destroyChart('pie');
+  const dist = data.ratingDistribution || {};
+  charts.pie = new Chart(document.getElementById('ratingPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+      datasets: [{
+        data: [dist[1]||0, dist[2]||0, dist[3]||0, dist[4]||0, dist[5]||0],
+        backgroundColor: [CHART_COLORS.red, CHART_COLORS.orange, CHART_COLORS.gold, CHART_COLORS.cyan, CHART_COLORS.green],
+        borderWidth: 2,
+        borderColor: '#0a1628'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 16, font: { family: 'Space Mono', size: 11 } } }
+      }
+    }
+  });
+
+  // Q1 Bar
+  destroyChart('bar');
+  const q1 = data.q1?.dist || {};
+  charts.bar = new Chart(document.getElementById('q1BarChart'), {
+    type: 'bar',
+    data: {
+      labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+      datasets: [{
+        label: 'Responses',
+        data: [q1[1]||0, q1[2]||0, q1[3]||0, q1[4]||0, q1[5]||0],
+        backgroundColor: [CHART_COLORS.red, CHART_COLORS.orange, CHART_COLORS.gold, CHART_COLORS.cyan, CHART_COLORS.green],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Punctuality Pie
+  destroyChart('punct');
+  const punct = data.punctuality || {};
+  const punctLabels = Object.keys(punct);
+  const punctData = Object.values(punct);
+  charts.punct = new Chart(document.getElementById('punctualityChart'), {
+    type: 'pie',
+    data: {
+      labels: punctLabels,
+      datasets: [{
+        data: punctData,
+        backgroundColor: [CHART_COLORS.green, CHART_COLORS.cyan, CHART_COLORS.gold, CHART_COLORS.red],
+        borderWidth: 2, borderColor: '#0a1628'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { family: 'Space Mono', size: 10 } } } }
+    }
+  });
+
+  // Interaction Bar
+  destroyChart('inter');
+  const inter = data.interaction || {};
+  charts.inter = new Chart(document.getElementById('interactionChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(inter),
+      datasets: [{
+        label: 'Responses',
+        data: Object.values(inter),
+        backgroundColor: [CHART_COLORS.green, CHART_COLORS.cyan, CHART_COLORS.gold, CHART_COLORS.red],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderRatingBreakdown(data) {
+  const el = document.getElementById('ratingBreakdown');
+  const qs = [data.q1, data.q2, data.q3].filter(Boolean);
+  if (!qs.length) { el.innerHTML = '<p style="color:var(--text-muted)">No rating data</p>'; return; }
+  el.innerHTML = qs.map((q, i) => {
+    const total = Object.values(q.dist || {}).reduce((a, b) => a + b, 0) || 1;
+    return `
+      <div style="margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <span style="font-family:var(--font-display);font-size:1rem;font-weight:600;">
+            Q${i+1}. ${q.label}
+          </span>
+          <span style="font-family:var(--font-mono);font-size:1.2rem;color:var(--accent-gold);">${q.avg?.toFixed(1) || 'N/A'} ★</span>
+        </div>
+        ${[5,4,3,2,1].map(star => {
+          const count = q.dist?.[star] || 0;
+          const pct = Math.round((count / total) * 100);
+          return `
+            <div class="rating-bar-row">
+              <span style="width:20px;">${star}★</span>
+              <div class="rating-bar-track">
+                <div class="rating-bar-fill" style="width:${pct}%"></div>
+              </div>
+              <span style="width:50px;text-align:right;">${count} (${pct}%)</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderYesNo(items) {
+  const el = document.getElementById('yesNoSummary');
+  if (!items?.length) { el.innerHTML = '<p style="color:var(--text-muted)">No yes/no data</p>'; return; }
+  el.innerHTML = items.map(item => {
+    const total = (item.yes + item.no) || 1;
+    const yesPct = Math.round((item.yes / total) * 100);
+    return `
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:0.9rem;color:var(--text-primary);margin-bottom:0.75rem;font-weight:500;">${item.question}</div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <div style="flex:1;">
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.72rem;margin-bottom:0.3rem;">
+              <span style="color:var(--accent-green)">YES</span>
+              <span>${item.yes} (${yesPct}%)</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:20px;height:10px;overflow:hidden;">
+              <div style="width:${yesPct}%;height:100%;background:var(--accent-green);border-radius:20px;transition:width 0.6s;"></div>
+            </div>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.72rem;margin-bottom:0.3rem;">
+              <span style="color:#ff6b6b">NO</span>
+              <span>${item.no} (${100-yesPct}%)</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:20px;height:10px;overflow:hidden;">
+              <div style="width:${100-yesPct}%;height:100%;background:#ff4444;border-radius:20px;transition:width 0.6s;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTextResponses(responses) {
+  const el = document.getElementById('textResponses');
+  if (!responses?.length) { el.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">No text responses submitted yet.</p>'; return; }
+  el.innerHTML = responses.map(r => `
+    <div class="response-card">
+      <div class="anon-id-tag">🔒 ${r.anonymousId}</div>
+      <div style="font-size:0.78rem;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:0.5rem;">
+        ${r.q}
+      </div>
+      <div style="font-size:0.92rem;color:var(--text-primary);line-height:1.6;">
+        "${r.a}"
+      </div>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>

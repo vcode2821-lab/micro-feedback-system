@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Feedback | ECE PTU</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/main.css">
+  <style>
+    .anon-notice {
+      background: rgba(0,255,136,0.08);
+      border: 1px solid rgba(0,255,136,0.25);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-size: 0.85rem;
+      color: var(--accent-green);
+      font-family: var(--font-mono);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .anon-notice-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .progress-bar-wrap {
+      background: rgba(255,255,255,0.06);
+      border-radius: 20px;
+      height: 6px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+      border-radius: 20px;
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: right;
+      margin-bottom: 0.5rem;
+    }
+    .deadline-banner {
+      background: rgba(255,107,53,0.1);
+      border: 1px solid rgba(255,107,53,0.3);
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--accent-orange);
+    }
+    .countdown-timer {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .submit-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+    .submit-big-btn {
+      padding: 1rem 3rem;
+      background: linear-gradient(135deg, var(--accent-green), #00aa55);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .submit-big-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,255,136,0.3);
+    }
+    .submit-big-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .success-screen {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    .success-icon { font-size: 5rem; margin-bottom: 1.5rem; }
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent-green);
+      margin-bottom: 0.75rem;
+    }
+    .token-display {
+      display: inline-block;
+      background: rgba(0,212,255,0.1);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      letter-spacing: 3px;
+      color: var(--accent-cyan);
+      margin: 1rem 0;
+    }
+    .closed-notice {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    .closed-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-brand">
+    <div class="brand-icon">⚡</div>
+    <div>
+      <div class="brand-title">ECE Feedback</div>
+      <div class="brand-sub">Punjab Technical University</div>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="admin.html" class="nav-btn btn-admin">Admin</a></li>
+    <li><a href="student.html" class="nav-btn btn-student">Student Access</a></li>
+    <li><a href="teacher.html" class="nav-btn btn-teacher">Teacher Dashboard</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-box">
+    <div class="modal-icon">👨‍🎓</div>
+    <div class="modal-title" style="color:var(--accent-green);">STUDENT LOGIN</div>
+    <div class="modal-sub">ENTER YOUR CREDENTIALS TO SUBMIT FEEDBACK</div>
+    <div class="form-group">
+      <label>STUDENT ID / ROLL NUMBER</label>
+      <input type="text" id="studentId" placeholder="e.g. 21ECE001" />
+    </div>
+    <div class="form-group">
+      <label>ACCESS PASSWORD</label>
+      <input type="password" id="studentPass" placeholder="Enter student password" />
+    </div>
+    <button class="btn-submit btn-student-submit" onclick="doStudentLogin()">ACCESS FEEDBACK FORM</button>
+    <div class="error-msg" id="loginErr">Invalid credentials or you are not selected for this round.</div>
+    <div style="text-align:center;margin-top:1.5rem;">
+      <a href="../../index.html" style="color:var(--text-muted);font-size:0.8rem;font-family:var(--font-mono);">← Back to Home</a>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN FORM -->
+<div class="dashboard" id="dashboard" style="display:none;">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title" style="color:var(--accent-green);">📝 FEEDBACK FORM</div>
+      <div style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono);margin-top:0.25rem;">
+        Your identity is protected • Anonymous submission
+      </div>
+    </div>
+    <button class="btn-action btn-red" onclick="doLogout()" style="padding:0.5rem 1rem;border:none;cursor:pointer;">LOGOUT</button>
+  </div>
+
+  <div class="dash-body">
+    <!-- Not Selected Screen -->
+    <div id="notSelectedScreen" style="display:none;" class="closed-notice">
+      <div class="closed-icon">🎲</div>
+      <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent-orange);margin-bottom:0.75rem;">Not Selected</div>
+      <p style="color:var(--text-secondary);max-width:400px;margin:0 auto;">
+        You were not randomly selected for this feedback round. Only 30 students are chosen per cycle. 
+        You may be selected in the next round.
+      </p>
+    </div>
+
+    <!-- Form Closed Screen -->
+    <div id="formClosedScreen" style="display:none;" class="closed-notice">
+      <div class="closed-icon">🔒</div>
+      <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:#ff6b6b;margin-bottom:0.75rem;">Form Closed</div>
+      <p style="color:var(--text-secondary);max-width:400px;margin:0 auto;">
+        The feedback form is currently closed. Please check back when the admin opens the next round.
+      </p>
+    </div>
+
+    <!-- Already Submitted Screen -->
+    <div id="alreadySubmittedScreen" style="display:none;" class="closed-notice">
+      <div class="closed-icon">✅</div>
+      <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent-green);margin-bottom:0.75rem;">Already Submitted</div>
+      <p style="color:var(--text-secondary);max-width:400px;margin:0 auto;">
+        You have already submitted feedback for this round. Each student can submit only once per cycle.
+      </p>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="successScreen" style="display:none;" class="success-screen">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">FEEDBACK SUBMITTED!</div>
+      <p style="color:var(--text-secondary);margin-bottom:1rem;">
+        Your anonymous feedback has been recorded and sent to the teacher. Thank you for your contribution!
+      </p>
+      <div>Your anonymous submission token:</div>
+      <div class="token-display" id="submissionToken">ANON_XXXX</div>
+      <p style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono);">
+        Save this token if you need to reference your submission. It does NOT contain your identity.
+      </p>
+    </div>
+
+    <!-- Actual Feedback Form -->
+    <div id="feedbackFormSection" style="display:none;">
+      <!-- Deadline Banner -->
+      <div class="deadline-banner" id="deadlineBanner" style="display:none;">
+        <span>⏰ DEADLINE:</span>
+        <span class="countdown-timer" id="countdown">--:--:--</span>
+        <span id="deadlineDate">Loading...</span>
+      </div>
+
+      <!-- Anon Notice -->
+      <div class="anon-notice">
+        <div class="anon-notice-icon">🔒</div>
+        <div>
+          <strong>ANONYMOUS SUBMISSION GUARANTEED</strong><br>
+          Your name and student ID are never stored with your feedback. The teacher can only see aggregated analytics — not who submitted what.
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-label" id="progressLabel">0 of 0 answered</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+      </div>
+
+      <!-- Questions Rendered Here -->
+      <div id="questionsContainer"></div>
+
+      <!-- Submit -->
+      <div class="submit-section">
+        <p style="color:var(--text-muted);font-size:0.82rem;font-family:var(--font-mono);margin-bottom:1.25rem;">
+          By submitting, you confirm this is your honest anonymous feedback.
+        </p>
+        <button class="submit-big-btn" id="submitBtn" onclick="submitFeedback()" disabled>
+          SUBMIT ANONYMOUS FEEDBACK
+        </button>
+        <div id="submitError" style="color:#ff6b6b;font-size:0.85rem;margin-top:0.75rem;display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="admin.html">Admin</a>
+  <a href="student.html">Student Access</a>
+  <a href="teacher.html">Teacher Dashboard</a>
+</div>
+
+<script src="../utils/config.js"></script>
+<script src="../utils/api.js"></script>
+<script>
+let studentToken = null;
+let currentQuestions = [];
+let answers = {};
+let deadline = null;
+
+window.addEventListener('DOMContentLoaded', () => {
+  const stored = Session.get(CONFIG.SESSION.STUDENT);
+  if (stored) {
+    studentToken = stored;
+    showDashboard();
+  }
+  window.addEventListener('scroll', () =>
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50));
+  document.getElementById('hamburger').addEventListener('click', () =>
+    document.getElementById('mobileMenu').classList.toggle('open'));
+  ['studentId','studentPass'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') doStudentLogin();
+    });
+  });
+});
+
+async function doStudentLogin() {
+  const id = document.getElementById('studentId').value.trim();
+  const pass = document.getElementById('studentPass').value;
+  if (!id || !pass) return;
+  document.getElementById('loginErr').style.display = 'none';
+  try {
+    const res = await API.login('student', pass, id);
+    if (res.success) {
+      studentToken = res.token;
+      Session.set(CONFIG.SESSION.STUDENT, studentToken);
+      Session.set(CONFIG.SESSION.STUDENT_ID, id);
+      showDashboard();
+    } else {
+      handleLoginError(res.reason);
+    }
+  } catch {
+    // Demo fallback
+    if (pass === CONFIG.PASSWORDS.student) {
+      studentToken = 'DEMO_' + id + '_' + Date.now();
+      Session.set(CONFIG.SESSION.STUDENT, studentToken);
+      Session.set(CONFIG.SESSION.STUDENT_ID, id);
+      showDashboard();
+    } else {
+      handleLoginError('wrong_password');
+    }
+  }
+}
+
+function handleLoginError(reason) {
+  const el = document.getElementById('loginErr');
+  if (reason === 'not_selected') el.textContent = 'You were not selected for this feedback round.';
+  else if (reason === 'already_submitted') el.textContent = 'You have already submitted feedback this round.';
+  else if (reason === 'form_closed') el.textContent = 'Feedback form is currently closed.';
+  else el.textContent = 'Invalid credentials. Please check your ID and password.';
+  el.style.display = 'block';
+}
+
+function doLogout() {
+  Session.clear(CONFIG.SESSION.STUDENT);
+  Session.clear(CONFIG.SESSION.STUDENT_ID);
+  studentToken = null;
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginModal').style.display = 'flex';
+}
+
+async function showDashboard() {
+  document.getElementById('loginModal').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  await loadFormState();
+}
+
+async function loadFormState() {
+  try {
+    const settings = await API.getSettings();
+    if (!settings.formOpen) {
+      showScreen('formClosedScreen'); return;
+    }
+    // Check if student is selected
+    if (settings.studentStatus === 'not_selected') {
+      showScreen('notSelectedScreen'); return;
+    }
+    if (settings.studentStatus === 'submitted') {
+      showScreen('alreadySubmittedScreen'); return;
+    }
+    // Load form
+    currentQuestions = settings.questions || getDemoQuestions();
+    deadline = settings.deadline;
+    showScreen('feedbackFormSection');
+    renderForm();
+    if (deadline) startCountdown();
+  } catch {
+    // Demo: show form directly
+    currentQuestions = getDemoQuestions();
+    showScreen('feedbackFormSection');
+    renderForm();
+  }
+}
+
+function getDemoQuestions() {
+  return [
+    { id: 'q1', type: 'rating', text: 'How would you rate the overall teaching quality of this subject?', required: true },
+    { id: 'q2', type: 'rating', text: 'Rate the clarity and effectiveness of content delivery', required: true },
+    { id: 'q3', type: 'rating', text: 'Rate teacher\'s punctuality and time management', required: true },
+    { id: 'q4', type: 'mcq', text: 'How often does the teacher take classes on time?', options: ['Always (95–100%)', 'Usually (75–95%)', 'Sometimes (50–75%)', 'Rarely (below 50%)'], required: true },
+    { id: 'q5', type: 'mcq', text: 'How would you rate teacher-student interaction?', options: ['Excellent', 'Good', 'Average', 'Poor'], required: true },
+    { id: 'q6', type: 'mcq', text: 'Are assignments and exams evaluated fairly?', options: ['Strongly Agree', 'Agree', 'Neutral', 'Disagree'], required: true },
+    { id: 'q7', type: 'yesno', text: 'Does the teacher encourage questions and class participation?', required: true },
+    { id: 'q8', type: 'yesno', text: 'Would you recommend this teacher to other students?', required: true },
+    { id: 'q9', type: 'text', text: 'What are the key strengths of this teacher?', required: false },
+    { id: 'q10', type: 'text', text: 'What improvements would you suggest to enhance the learning experience?', required: false }
+  ];
+}
+
+function showScreen(id) {
+  ['notSelectedScreen','formClosedScreen','alreadySubmittedScreen','successScreen','feedbackFormSection'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+
+function renderForm() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = currentQuestions.map((q, i) => buildQuestion(q, i)).join('');
+  updateProgress();
+}
+
+function buildQuestion(q, index) {
+  let inputHtml = '';
+  if (q.type === 'rating') {
+    inputHtml = `
+      <div class="star-rating" id="stars_${q.id}">
+        ${[1,2,3,4,5].map(n => `
+          <span class="star" data-val="${n}" onclick="setRating('${q.id}', ${n})" title="${n} Star${n>1?'s':''}">★</span>
+        `).join('')}
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);margin-top:0.5rem;" id="ratingLabel_${q.id}">
+        Click a star to rate
+      </div>
+    `;
+  } else if (q.type === 'mcq') {
+    inputHtml = (q.options || []).map(opt => `
+      <div class="mcq-option" onclick="selectMCQ('${q.id}', '${opt}', this)">
+        <input type="radio" name="${q.id}" value="${opt}" style="accent-color:var(--accent-cyan);" readonly/>
+        <span>${opt}</span>
+      </div>
+    `).join('');
+  } else if (q.type === 'yesno') {
+    inputHtml = `
+      <div style="display:flex;gap:0.75rem;">
+        <div class="mcq-option" style="flex:1;justify-content:center;" onclick="selectMCQ('${q.id}', 'Yes', this)">
+          <input type="radio" name="${q.id}" value="Yes" readonly/>
+          <span>✅ Yes</span>
+        </div>
+        <div class="mcq-option" style="flex:1;justify-content:center;" onclick="selectMCQ('${q.id}', 'No', this)">
+          <input type="radio" name="${q.id}" value="No" readonly/>
+          <span>❌ No</span>
+        </div>
+      </div>
+    `;
+  } else if (q.type === 'text') {
+    inputHtml = `
+      <textarea 
+        id="text_${q.id}"
+        placeholder="Type your response here..." 
+        oninput="setTextAnswer('${q.id}', this.value)"
+        style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;
+               padding:0.75rem;color:var(--text-primary);font-family:var(--font-body);font-size:0.9rem;
+               resize:vertical;min-height:100px;outline:none;transition:border-color 0.2s;"
+        onfocus="this.style.borderColor='var(--accent-cyan)'"
+        onblur="this.style.borderColor='var(--border)'"
+      ></textarea>
+    `;
+  }
+  return `
+    <div class="question-block">
+      <div class="question-text">
+        <span class="q-number">Q${index + 1}</span>
+        ${q.text}
+        ${q.required ? '<span style="color:#ff6b6b;margin-left:0.25rem;">*</span>' : ''}
+      </div>
+      ${inputHtml}
+    </div>
+  `;
+}
+
+const ratingLabels = ['','Poor','Fair','Good','Very Good','Excellent'];
+
+function setRating(qId, val) {
+  answers[qId] = val;
+  const stars = document.querySelectorAll(`#stars_${qId} .star`);
+  stars.forEach((s, i) => s.classList.toggle('active', i < val));
+  document.getElementById(`ratingLabel_${qId}`).textContent = `${val}/5 — ${ratingLabels[val]}`;
+  updateProgress();
+}
+
+function selectMCQ(qId, val, el) {
+  answers[qId] = val;
+  const parent = el.closest('.question-block');
+  parent.querySelectorAll('.mcq-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+  updateProgress();
+}
+
+function setTextAnswer(qId, val) {
+  answers[qId] = val.trim();
+  updateProgress();
+}
+
+function updateProgress() {
+  const required = currentQuestions.filter(q => q.required);
+  const answered = required.filter(q => answers[q.id] !== undefined && answers[q.id] !== '');
+  const pct = required.length > 0 ? Math.round((answered.length / required.length) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${answered.length} of ${required.length} required questions answered`;
+  document.getElementById('submitBtn').disabled = answered.length < required.length;
+}
+
+async function submitFeedback() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'SUBMITTING...';
+  const payload = currentQuestions.map(q => ({
+    questionId: q.id,
+    question: q.text,
+    type: q.type,
+    answer: answers[q.id] !== undefined ? answers[q.id] : null
+  }));
+  try {
+    const res = await API.submitFeedback(studentToken, payload);
+    const token = res.anonymousId || 'ANON_' + Math.random().toString(36).substr(2,6).toUpperCase();
+    document.getElementById('submissionToken').textContent = token;
+    showScreen('successScreen');
+    Session.clear(CONFIG.SESSION.STUDENT);
+  } catch {
+    // Demo success
+    const token = 'ANON_' + Math.random().toString(36).substr(2,6).toUpperCase();
+    document.getElementById('submissionToken').textContent = token;
+    showScreen('successScreen');
+  }
+}
+
+function startCountdown() {
+  const banner = document.getElementById('deadlineBanner');
+  const dl = new Date(deadline);
+  document.getElementById('deadlineDate').textContent = dl.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+  banner.style.display = 'flex';
+  function tick() {
+    const now = new Date();
+    const diff = dl - now;
+    if (diff <= 0) {
+      document.getElementById('countdown').textContent = 'EXPIRED';
+      document.getElementById('submitBtn').disabled = true;
+      return;
+    }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('countdown').textContent =
+      `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    setTimeout(tick, 1000);
+  }
+  tick();
+}
+</script>
+</body>
+</html>

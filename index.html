@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ECE Feedback System | PTU</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/main.css">
+</head>
+<body>
+
+<!-- ─── NAVBAR ─── -->
+<nav class="navbar" id="navbar">
+  <div class="nav-brand">
+    <div class="brand-icon">⚡</div>
+    <div>
+      <div class="brand-title">ECE Feedback</div>
+      <div class="brand-sub">Punjab Technical University</div>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="src/pages/admin.html" class="nav-btn btn-admin">Admin</a></li>
+    <li><a href="src/pages/student.html" class="nav-btn btn-student">Student Access</a></li>
+    <li><a href="src/pages/teacher.html" class="nav-btn btn-teacher">Teacher Dashboard</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-circuit"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="pulse-dot"></span>
+      Dept. of Electronics & Communication Engineering
+    </div>
+    <h1 class="hero-title">
+      Micro Feedback<br><span class="gradient-text">Intelligence System</span>
+    </h1>
+    <p class="hero-desc">
+      A secure, anonymous, and role-based feedback platform designed for ECE Department, PTU.
+      Empowering transparent communication between students, teachers, and administration.
+    </p>
+    <div class="hero-actions">
+      <a href="src/pages/student.html" class="cta-primary">Submit Feedback</a>
+      <a href="src/pages/teacher.html" class="cta-secondary">View Dashboard</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num" id="stat-responses">--</span><span class="stat-label">Responses</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" id="stat-limit">30</span><span class="stat-label">Max Allowed</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" id="stat-status">--</span><span class="stat-label">Form Status</span></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="circuit-board">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="circuit-svg">
+        <!-- Circuit board paths -->
+        <g stroke="#00d4ff" stroke-width="1.5" fill="none" opacity="0.4">
+          <path d="M50 200 L150 200 L150 100 L250 100"/>
+          <path d="M250 100 L300 100 L300 50"/>
+          <path d="M300 50 L350 50"/>
+          <path d="M150 200 L150 300 L200 300"/>
+          <path d="M200 300 L200 350 L300 350 L300 300"/>
+          <path d="M300 300 L350 300"/>
+          <path d="M250 200 L350 200"/>
+          <path d="M50 100 L100 100 L100 150 L200 150"/>
+          <path d="M200 150 L250 150 L250 200"/>
+          <path d="M100 300 L100 250 L50 250"/>
+        </g>
+        <!-- Nodes -->
+        <g fill="#00d4ff" opacity="0.8">
+          <circle cx="150" cy="200" r="5"/>
+          <circle cx="250" cy="100" r="5"/>
+          <circle cx="300" cy="50" r="4"/>
+          <circle cx="150" cy="300" r="5"/>
+          <circle cx="300" cy="300" r="5"/>
+          <circle cx="250" cy="200" r="5"/>
+          <circle cx="200" cy="150" r="4"/>
+          <circle cx="100" cy="150" r="4"/>
+          <circle cx="100" cy="250" r="4"/>
+        </g>
+        <!-- Chips -->
+        <g fill="none" stroke="#7c3aed" stroke-width="1.5" opacity="0.6">
+          <rect x="280" y="175" width="50" height="50" rx="3"/>
+          <rect x="125" y="275" width="55" height="40" rx="3"/>
+          <rect x="220" y="75" width="60" height="30" rx="3"/>
+        </g>
+        <!-- LED indicators (animated) -->
+        <circle cx="305" cy="200" r="4" fill="#00ff88" class="led-blink"/>
+        <circle cx="153" cy="295" r="4" fill="#ff6b35" class="led-blink" style="animation-delay:0.5s"/>
+        <circle cx="250" cy="90" r="4" fill="#00d4ff" class="led-blink" style="animation-delay:1s"/>
+      </svg>
+    </div>
+    <div class="floating-card fc1">
+      <div class="fc-icon">🔒</div>
+      <div>Anonymous Feedback</div>
+    </div>
+    <div class="floating-card fc2">
+      <div class="fc-icon">📊</div>
+      <div>Real-time Analytics</div>
+    </div>
+    <div class="floating-card fc3">
+      <div class="fc-icon">🎯</div>
+      <div>Role-Based Access</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURE CARDS ─── -->
+<section class="features">
+  <div class="section-header">
+    <p class="section-label">SYSTEM ARCHITECTURE</p>
+    <h2>Three-Role Secure Platform</h2>
+    <p class="section-desc">Each role is independently authenticated with strict data isolation</p>
+  </div>
+  <div class="cards-grid">
+
+    <div class="feature-card card-admin">
+      <div class="card-glow"></div>
+      <div class="card-badge">FULL CONTROL</div>
+      <div class="card-icon">🛡️</div>
+      <h3>Admin Panel</h3>
+      <p>Complete system control — manage response limits, deadlines, questions, and reveal student identities when needed.</p>
+      <ul class="card-features">
+        <li>✓ Open / Close feedback form</li>
+        <li>✓ Set response limit (default 30)</li>
+        <li>✓ Add / edit questions</li>
+        <li>✓ Set deadline dates</li>
+        <li>✓ View student identities</li>
+        <li>✓ Reset for new batch</li>
+        <li>✓ Manage user access</li>
+      </ul>
+      <a href="src/pages/admin.html" class="card-cta">Enter Admin Panel →</a>
+    </div>
+
+    <div class="feature-card card-student">
+      <div class="card-glow"></div>
+      <div class="card-badge">ANONYMOUS</div>
+      <div class="card-icon">👨‍🎓</div>
+      <h3>Student Access</h3>
+      <p>Selected students submit critical, anonymous feedback. Identity is fully protected from teachers.</p>
+      <ul class="card-features">
+        <li>✓ Secure login</li>
+        <li>✓ Random 30-student selection</li>
+        <li>✓ Rating & MCQ questions</li>
+        <li>✓ Anonymous submission</li>
+        <li>✓ One-time submission lock</li>
+        <li>✓ Real-time deadline display</li>
+      </ul>
+      <a href="src/pages/student.html" class="card-cta">Submit Feedback →</a>
+    </div>
+
+    <div class="feature-card card-teacher">
+      <div class="card-glow"></div>
+      <div class="card-badge">ANALYTICS</div>
+      <div class="card-icon">📈</div>
+      <h3>Teacher Dashboard</h3>
+      <p>View aggregated feedback analytics, charts, and summaries — zero student identity revealed.</p>
+      <ul class="card-features">
+        <li>✓ Pie & bar charts</li>
+        <li>✓ Average ratings</li>
+        <li>✓ Response summaries</li>
+        <li>✓ Email notifications</li>
+        <li>✓ No student identity</li>
+        <li>✓ Export reports</li>
+      </ul>
+      <a href="src/pages/teacher.html" class="card-cta">View Dashboard →</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section class="how-it-works">
+  <div class="section-header">
+    <p class="section-label">PROCESS FLOW</p>
+    <h2>How It Works</h2>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <h4>Admin Opens Feedback</h4>
+        <p>Admin sets questions, deadline, and randomly selects 30 students to participate.</p>
+      </div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <h4>Students Submit</h4>
+        <p>Selected students log in and submit anonymous feedback before the deadline.</p>
+      </div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <h4>Teacher Reviews</h4>
+        <p>Teacher views anonymized analytics, ratings, and charts on the dashboard.</p>
+      </div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <h4>Admin Audits</h4>
+        <p>Admin can view full data including student identities for accountability.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="footer-title">ECE Micro Feedback System</div>
+        <div class="footer-sub">Department of Electronics & Communication Engineering</div>
+        <div class="footer-sub">Punjab Technical University</div>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="src/pages/admin.html">Admin</a>
+      <a href="src/pages/student.html">Student</a>
+      <a href="src/pages/teacher.html">Teacher</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>DC Course Project | PTU | Built with Google Apps Script + Vercel</p>
+  </div>
+</footer>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="src/pages/admin.html">Admin</a>
+  <a href="src/pages/student.html">Student Access</a>
+  <a href="src/pages/teacher.html">Teacher Dashboard</a>
+</div>
+
+<script src="src/utils/config.js"></script>
+<script src="src/utils/api.js"></script>
+<script>
+  // Navbar scroll effect
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Hamburger menu
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+
+  // Load live stats from backend
+  async function loadStats() {
+    try {
+      const settings = await API.getSettings();
+      if (settings) {
+        document.getElementById('stat-responses').textContent = settings.responseCount ?? '--';
+        document.getElementById('stat-limit').textContent = settings.maxResponses ?? '30';
+        document.getElementById('stat-status').textContent = settings.formOpen ? 'OPEN' : 'CLOSED';
+        document.getElementById('stat-status').style.color = settings.formOpen ? '#00ff88' : '#ff4444';
+      }
+    } catch(e) { console.log('Backend not connected yet'); }
+  }
+  loadStats();
+</script>
+</body>
+</html>

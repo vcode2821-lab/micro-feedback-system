@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Control Panel | ECE Feedback</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/main.css">
+  <style>
+    .section-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .tab-btn {
+      padding: 0.5rem 1.2rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(255,68,68,0.15);
+      border-color: #ff4444;
+      color: #ff4444;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .ctrl-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+    .ctrl-label { font-size: 0.9rem; color: var(--text-secondary); }
+    .ctrl-label small { display: block; font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono); }
+    .input-sm {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      width: 120px;
+      outline: none;
+    }
+    .input-sm:focus { border-color: var(--accent-cyan); }
+    .btn-action {
+      padding: 0.5rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-red { background: rgba(255,68,68,0.2); color: #ff4444; border: 1px solid rgba(255,68,68,0.4); }
+    .btn-red:hover { background: #ff4444; color: white; }
+    .btn-cyan { background: rgba(0,212,255,0.15); color: var(--accent-cyan); border: 1px solid rgba(0,212,255,0.4); }
+    .btn-cyan:hover { background: var(--accent-cyan); color: #000; }
+    .btn-green { background: rgba(0,255,136,0.15); color: var(--accent-green); border: 1px solid rgba(0,255,136,0.4); }
+    .btn-green:hover { background: var(--accent-green); color: #000; }
+    .btn-orange { background: rgba(255,107,53,0.15); color: var(--accent-orange); border: 1px solid rgba(255,107,53,0.4); }
+    .btn-orange:hover { background: var(--accent-orange); color: white; }
+    .question-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .q-drag { color: var(--text-muted); cursor: grab; font-size: 1.2rem; padding-top: 0.2rem; }
+    .q-body { flex: 1; }
+    .q-type-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+    .q-type-rating { background: rgba(255,215,0,0.15); color: var(--accent-gold); }
+    .q-type-mcq { background: rgba(124,58,237,0.15); color: #a78bfa; }
+    .q-type-text { background: rgba(0,212,255,0.15); color: var(--accent-cyan); }
+    .q-text { font-size: 0.9rem; color: var(--text-secondary); }
+    .q-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .identity-note {
+      background: rgba(255,68,68,0.08);
+      border: 1px solid rgba(255,68,68,0.25);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.82rem;
+      color: #ff9999;
+      margin-bottom: 1.5rem;
+      font-family: var(--font-mono);
+    }
+    .add-q-form {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+    textarea.form-group-ta {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 80px;
+      outline: none;
+    }
+    textarea.form-group-ta:focus { border-color: var(--accent-cyan); }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-brand">
+    <div class="brand-icon">⚡</div>
+    <div>
+      <div class="brand-title">ECE Feedback</div>
+      <div class="brand-sub">Punjab Technical University</div>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="admin.html" class="nav-btn btn-admin">Admin</a></li>
+    <li><a href="student.html" class="nav-btn btn-student">Student Access</a></li>
+    <li><a href="teacher.html" class="nav-btn btn-teacher">Teacher Dashboard</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-box">
+    <div class="modal-icon">🛡️</div>
+    <div class="modal-title" style="color:#ff4444;">ADMIN PANEL</div>
+    <div class="modal-sub">RESTRICTED ACCESS — AUTHORIZED PERSONNEL ONLY</div>
+    <div class="form-group">
+      <label>ADMIN PASSWORD</label>
+      <input type="password" id="adminPass" placeholder="Enter admin password" />
+    </div>
+    <button class="btn-submit btn-admin-submit" onclick="doAdminLogin()">ACCESS CONTROL PANEL</button>
+    <div class="error-msg" id="loginErr">Incorrect password. Access denied.</div>
+    <div style="text-align:center;margin-top:1.5rem;">
+      <a href="../../index.html" style="color:var(--text-muted);font-size:0.8rem;font-family:var(--font-mono);">← Back to Home</a>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard" style="display:none;">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title" style="color:#ff4444;">🛡️ ADMIN CONTROL PANEL</div>
+      <div style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono);margin-top:0.25rem;">
+        Full system access · ECE Department · PTU
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;">
+      <span id="formStatusBadge" class="badge badge-closed">FORM CLOSED</span>
+      <button class="btn-action btn-red" onclick="doLogout()">LOGOUT</button>
+    </div>
+  </div>
+
+  <div class="dash-body">
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-card-num" id="s-total">0</span>
+        <span class="stat-card-label">Total Responses</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-num" id="s-limit">30</span>
+        <span class="stat-card-label">Max Allowed</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-num" id="s-selected">0</span>
+        <span class="stat-card-label">Students Selected</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-num" id="s-deadline">--</span>
+        <span class="stat-card-label">Days to Deadline</span>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="section-tabs">
+      <button class="tab-btn active" onclick="switchTab('control')">⚙️ Form Control</button>
+      <button class="tab-btn" onclick="switchTab('questions')">📋 Questions</button>
+      <button class="tab-btn" onclick="switchTab('students')">👥 Students</button>
+      <button class="tab-btn" onclick="switchTab('responses')">📊 Responses</button>
+      <button class="tab-btn" onclick="switchTab('users')">🔐 Access Control</button>
+      <button class="tab-btn" onclick="switchTab('audit')">🔍 Audit Log</button>
+    </div>
+
+    <!-- TAB: FORM CONTROL -->
+    <div class="tab-content active" id="tab-control">
+      <div class="panel-grid">
+
+        <div class="panel">
+          <div class="panel-title">Form Status</div>
+          <div class="ctrl-row">
+            <div class="ctrl-label">
+              Open / Close Feedback Form
+              <small>Controls whether students can submit</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggleForm" onchange="updateFormStatus()"/>
+              <div class="toggle-slider"></div>
+            </label>
+          </div>
+          <div class="ctrl-row" style="margin-top:1rem;">
+            <div class="ctrl-label">
+              Max Responses (per round)
+              <small>Random selection limit</small>
+            </div>
+            <input type="number" class="input-sm" id="maxResponses" value="30" min="1" max="200" onchange="updateMaxResponses()"/>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Deadline Settings</div>
+          <div class="form-group">
+            <label>FEEDBACK DEADLINE</label>
+            <input type="datetime-local" id="deadlineInput"/>
+          </div>
+          <button class="btn-action btn-cyan" onclick="updateDeadline()" style="width:100%;">SET DEADLINE</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Batch Management</div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <button class="btn-action btn-orange" onclick="selectRandomStudents()" style="width:100%;">
+              🎲 RANDOMLY SELECT STUDENTS
+            </button>
+            <button class="btn-action btn-red" onclick="confirmReset()" style="width:100%;">
+              🔄 RESET FOR NEW BATCH
+            </button>
+            <div style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);line-height:1.5;">
+              Reset clears all responses & re-enables all students for the next round.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Email Notification</div>
+          <div class="form-group">
+            <label>TEACHER EMAIL (receives new feedback)</label>
+            <input type="email" id="teacherEmail" placeholder="teacher@ptu.ac.in"/>
+          </div>
+          <button class="btn-action btn-green" onclick="updateTeacherEmail()" style="width:100%;">SAVE EMAIL</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB: QUESTIONS -->
+    <div class="tab-content" id="tab-questions">
+      <div class="panel" style="margin-bottom:1.5rem;">
+        <div class="panel-title">Current Questions</div>
+        <div id="questionsList">
+          <div class="loading"><div class="spinner"></div>Loading questions...</div>
+        </div>
+        <button class="btn-action btn-cyan" onclick="showAddQuestion()" style="margin-top:1rem;">+ ADD QUESTION</button>
+        <div class="add-q-form" id="addQForm" style="display:none;">
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label>QUESTION TEXT</label>
+            <textarea class="form-group-ta" id="newQText" placeholder="Enter your question..."></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>QUESTION TYPE</label>
+              <select id="newQType" onchange="toggleQOptions()">
+                <option value="rating">⭐ Star Rating (1–5)</option>
+                <option value="mcq">🔘 Multiple Choice</option>
+                <option value="text">💬 Open Text</option>
+                <option value="yesno">✅ Yes / No</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>REQUIRED?</label>
+              <select id="newQRequired">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </div>
+          <div id="mcqOptionsSection" style="display:none;margin-bottom:1rem;">
+            <label style="font-size:0.75rem;letter-spacing:2px;color:var(--text-muted);font-family:var(--font-mono);">OPTIONS (one per line)</label>
+            <textarea class="form-group-ta" id="mcqOptions" placeholder="Option A&#10;Option B&#10;Option C&#10;Option D" style="height:100px;margin-top:0.5rem;"></textarea>
+          </div>
+          <div style="display:flex;gap:0.75rem;">
+            <button class="btn-action btn-green" onclick="saveQuestion()">SAVE QUESTION</button>
+            <button class="btn-action btn-red" onclick="document.getElementById('addQForm').style.display='none'">CANCEL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: STUDENTS (with identity) -->
+    <div class="tab-content" id="tab-students">
+      <div class="identity-note">
+        ⚠️ ADMIN ONLY — This section shows student identities. This information is NOT visible to teachers.
+      </div>
+      <div class="panel">
+        <div class="panel-title" style="justify-content:space-between;display:flex;align-items:center;">
+          <span>Student Registry</span>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn-action btn-cyan" onclick="showAddStudent()">+ ADD</button>
+            <button class="btn-action btn-orange" onclick="showImportStudents()">⬆ IMPORT CSV</button>
+          </div>
+        </div>
+        <div class="table-wrap" id="studentsTable">
+          <div class="loading"><div class="spinner"></div>Loading students...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: RESPONSES (admin view with identity) -->
+    <div class="tab-content" id="tab-responses">
+      <div class="identity-note">
+        ⚠️ ADMIN VIEW — Student identities are shown here. Teachers see anonymized data only.
+      </div>
+      <div class="panel">
+        <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>All Feedback Responses</span>
+          <button class="btn-action btn-cyan" onclick="exportResponses()">⬇ EXPORT CSV</button>
+        </div>
+        <div id="responsesTable">
+          <div class="loading"><div class="spinner"></div>Loading responses...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: USERS / ACCESS CONTROL -->
+    <div class="tab-content" id="tab-users">
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="panel-title">Change Passwords</div>
+          <div class="form-group">
+            <label>ADMIN PASSWORD</label>
+            <input type="password" id="newAdminPass" placeholder="New admin password"/>
+          </div>
+          <div class="form-group">
+            <label>TEACHER PASSWORD</label>
+            <input type="password" id="newTeacherPass" placeholder="New teacher password"/>
+          </div>
+          <div class="form-group">
+            <label>STUDENT PASSWORD</label>
+            <input type="password" id="newStudentPass" placeholder="New student password"/>
+          </div>
+          <button class="btn-action btn-red" onclick="updatePasswords()" style="width:100%;">UPDATE PASSWORDS</button>
+          <div style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);margin-top:0.75rem;">
+            Passwords are stored securely in Google Sheets. Leave blank to keep current.
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Teacher Email Access</div>
+          <div class="form-group">
+            <label>TEACHER EMAIL</label>
+            <input type="email" id="teacherEmailAccess" placeholder="teacher@ptu.ac.in"/>
+          </div>
+          <div class="form-group">
+            <label>TEACHER NAME</label>
+            <input type="text" id="teacherName" placeholder="Prof. Name"/>
+          </div>
+          <button class="btn-action btn-cyan" onclick="saveTeacherAccess()" style="width:100%;">SAVE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: AUDIT LOG -->
+    <div class="tab-content" id="tab-audit">
+      <div class="panel">
+        <div class="panel-title">System Audit Log</div>
+        <div id="auditLog">
+          <div class="loading"><div class="spinner"></div>Loading audit log...</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dash-body -->
+</div><!-- /dashboard -->
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="admin.html">Admin</a>
+  <a href="student.html">Student Access</a>
+  <a href="teacher.html">Teacher Dashboard</a>
+</div>
+
+<script src="../utils/config.js"></script>
+<script src="../utils/api.js"></script>
+<script>
+// ── SESSION ──────────────────────────────────────────
+
+let adminKey = null;
+let appSettings = {};
+
+window.addEventListener('DOMContentLoaded', () => {
+  const stored = Session.get(CONFIG.SESSION.ADMIN);
+  if (stored) { adminKey = stored; showDashboard(); }
+  window.addEventListener('scroll', () =>
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50));
+  document.getElementById('hamburger').addEventListener('click', () =>
+    document.getElementById('mobileMenu').classList.toggle('open'));
+  document.getElementById('adminPass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doAdminLogin();
+  });
+});
+
+async function doAdminLogin() {
+  const pass = document.getElementById('adminPass').value;
+  if (!pass) return;
+  try {
+    const res = await API.login('admin', pass);
+    if (res.success) {
+      adminKey = res.token || pass;
+      Session.set(CONFIG.SESSION.ADMIN, adminKey);
+      showDashboard();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  } catch {
+    // Fallback: compare against config (only works before backend is set up)
+    if (pass === CONFIG.PASSWORDS.admin) {
+      adminKey = pass;
+      Session.set(CONFIG.SESSION.ADMIN, adminKey);
+      showDashboard();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  }
+}
+
+function doLogout() {
+  Session.clear(CONFIG.SESSION.ADMIN);
+  adminKey = null;
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginModal').style.display = 'flex';
+}
+
+async function showDashboard() {
+  document.getElementById('loginModal').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  await loadSettings();
+  loadStudents();
+  loadResponses();
+  loadQuestions();
+  loadAuditLog();
+}
+
+// ── SETTINGS ─────────────────────────────────────────
+
+async function loadSettings() {
+  try {
+    appSettings = await API.getSettings();
+    document.getElementById('s-total').textContent = appSettings.responseCount || 0;
+    document.getElementById('s-limit').textContent = appSettings.maxResponses || 30;
+    document.getElementById('s-selected').textContent = appSettings.selectedCount || 0;
+    document.getElementById('maxResponses').value = appSettings.maxResponses || 30;
+    document.getElementById('toggleForm').checked = appSettings.formOpen || false;
+    const badge = document.getElementById('formStatusBadge');
+    badge.textContent = appSettings.formOpen ? 'FORM OPEN' : 'FORM CLOSED';
+    badge.className = 'badge ' + (appSettings.formOpen ? 'badge-open' : 'badge-closed');
+    if (appSettings.deadline) {
+      const d = new Date(appSettings.deadline);
+      const now = new Date();
+      const diff = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+      document.getElementById('s-deadline').textContent = diff > 0 ? diff : 'PAST';
+      document.getElementById('deadlineInput').value = appSettings.deadline.slice(0, 16);
+    }
+    if (appSettings.teacherEmail)
+      document.getElementById('teacherEmail').value = appSettings.teacherEmail;
+  } catch (e) {
+    showToast('Backend not connected — showing demo data', 'info');
+    loadDemoSettings();
+  }
+}
+
+function loadDemoSettings() {
+  document.getElementById('s-total').textContent = 12;
+  document.getElementById('s-limit').textContent = 30;
+  document.getElementById('s-selected').textContent = 30;
+  document.getElementById('s-deadline').textContent = 5;
+}
+
+async function updateFormStatus() {
+  const isOpen = document.getElementById('toggleForm').checked;
+  try {
+    await API.updateSettings({ formOpen: isOpen }, adminKey);
+    const badge = document.getElementById('formStatusBadge');
+    badge.textContent = isOpen ? 'FORM OPEN' : 'FORM CLOSED';
+    badge.className = 'badge ' + (isOpen ? 'badge-open' : 'badge-closed');
+    showToast(isOpen ? 'Form is now OPEN' : 'Form is now CLOSED', isOpen ? 'success' : 'error');
+  } catch { showToast('Failed to update form status', 'error'); }
+}
+
+async function updateMaxResponses() {
+  const val = parseInt(document.getElementById('maxResponses').value);
+  if (!val || val < 1) return;
+  try {
+    await API.updateSettings({ maxResponses: val }, adminKey);
+    document.getElementById('s-limit').textContent = val;
+    showToast(`Max responses set to ${val}`, 'success');
+  } catch { showToast('Failed to update limit', 'error'); }
+}
+
+async function updateDeadline() {
+  const val = document.getElementById('deadlineInput').value;
+  if (!val) return;
+  try {
+    await API.updateSettings({ deadline: val }, adminKey);
+    showToast('Deadline updated successfully', 'success');
+    await loadSettings();
+  } catch { showToast('Failed to update deadline', 'error'); }
+}
+
+async function updateTeacherEmail() {
+  const email = document.getElementById('teacherEmail').value;
+  if (!email) return;
+  try {
+    await API.updateSettings({ teacherEmail: email }, adminKey);
+    showToast('Teacher email updated', 'success');
+  } catch { showToast('Failed to update email', 'error'); }
+}
+
+// ── BATCH ─────────────────────────────────────────────
+
+async function selectRandomStudents() {
+  const limit = parseInt(document.getElementById('maxResponses').value) || 30;
+  if (!confirm(`Randomly select ${limit} students for this feedback round?`)) return;
+  try {
+    const res = await API.selectStudents(adminKey, limit);
+    showToast(`${res.selected || limit} students selected randomly!`, 'success');
+    await loadSettings();
+    loadStudents();
+  } catch { showToast('Failed to select students', 'error'); }
+}
+
+async function confirmReset() {
+  if (!confirm('⚠️ RESET for new batch?\nThis will CLEAR all responses and deselect all students. This cannot be undone!')) return;
+  try {
+    await API.resetBatch(adminKey);
+    showToast('Batch reset complete. Ready for new round.', 'success');
+    await loadSettings();
+    loadStudents();
+    loadResponses();
+  } catch { showToast('Failed to reset batch', 'error'); }
+}
+
+// ── QUESTIONS ─────────────────────────────────────────
+
+async function loadQuestions() {
+  const el = document.getElementById('questionsList');
+  try {
+    const res = await API.getSettings();
+    const questions = res.questions || getDemoQuestions();
+    renderQuestions(questions);
+  } catch {
+    renderQuestions(getDemoQuestions());
+  }
+}
+
+function getDemoQuestions() {
+  return [
+    { id: 'q1', type: 'rating', text: 'How would you rate the overall teaching quality?', required: true },
+    { id: 'q2', type: 'rating', text: 'Rate the clarity of course content delivery', required: true },
+    { id: 'q3', type: 'mcq', text: 'How often does the teacher take class on time?', options: ['Always', 'Usually', 'Sometimes', 'Rarely'], required: true },
+    { id: 'q4', type: 'mcq', text: 'How is the teacher\'s interaction with students?', options: ['Excellent', 'Good', 'Average', 'Poor'], required: true },
+    { id: 'q5', type: 'text', text: 'What improvements would you suggest for this course?', required: false },
+    { id: 'q6', type: 'yesno', text: 'Would you recommend this teacher to other students?', required: true }
+  ];
+}
+
+function renderQuestions(questions) {
+  const el = document.getElementById('questionsList');
+  if (!questions.length) { el.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">No questions added yet.</p>'; return; }
+  el.innerHTML = questions.map((q, i) => `
+    <div class="question-item" data-id="${q.id}">
+      <div class="q-drag">⋮⋮</div>
+      <div class="q-body">
+        <span class="q-type-badge q-type-${q.type}">${q.type.toUpperCase()}</span>
+        <div class="q-text">Q${i+1}. ${q.text}</div>
+        ${q.options ? `<div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.3rem;font-family:var(--font-mono);">Options: ${q.options.join(' | ')}</div>` : ''}
+      </div>
+      <div class="q-actions">
+        <button class="btn-action btn-cyan" onclick="editQuestion('${q.id}')" style="padding:0.4rem 0.75rem;font-size:0.75rem;">EDIT</button>
+        <button class="btn-action btn-red" onclick="deleteQuestion('${q.id}')" style="padding:0.4rem 0.75rem;font-size:0.75rem;">DEL</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showAddQuestion() {
+  const f = document.getElementById('addQForm');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleQOptions() {
+  const type = document.getElementById('newQType').value;
+  document.getElementById('mcqOptionsSection').style.display = type === 'mcq' ? 'block' : 'none';
+}
+
+async function saveQuestion() {
+  const text = document.getElementById('newQText').value.trim();
+  const type = document.getElementById('newQType').value;
+  const required = document.getElementById('newQRequired').value === 'true';
+  const optRaw = document.getElementById('mcqOptions').value;
+  if (!text) { showToast('Question text is required', 'error'); return; }
+  const newQ = {
+    id: 'q_' + Date.now(),
+    text, type, required,
+    options: type === 'mcq' ? optRaw.split('\n').filter(o => o.trim()) : null
+  };
+  try {
+    const current = (appSettings.questions || getDemoQuestions());
+    await API.updateQuestions(adminKey, [...current, newQ]);
+    showToast('Question saved!', 'success');
+    document.getElementById('addQForm').style.display = 'none';
+    document.getElementById('newQText').value = '';
+    loadQuestions();
+  } catch { showToast('Failed to save question', 'error'); }
+}
+
+async function deleteQuestion(id) {
+  if (!confirm('Delete this question?')) return;
+  try {
+    const current = appSettings.questions || getDemoQuestions();
+    await API.updateQuestions(adminKey, current.filter(q => q.id !== id));
+    showToast('Question deleted', 'success');
+    loadQuestions();
+  } catch { showToast('Failed to delete', 'error'); }
+}
+
+function editQuestion(id) {
+  showToast('Edit mode: delete and re-add for now. Full inline edit coming soon.', 'info');
+}
+
+// ── STUDENTS ──────────────────────────────────────────
+
+async function loadStudents() {
+  const el = document.getElementById('studentsTable');
+  try {
+    const res = await API.getStudentsFull(adminKey);
+    renderStudentsTable(res.students || getDemoStudents());
+  } catch {
+    renderStudentsTable(getDemoStudents());
+  }
+}
+
+function getDemoStudents() {
+  return Array.from({ length: 10 }, (_, i) => ({
+    id: `STU${1001 + i}`,
+    name: `Student ${String.fromCharCode(65+i)}. Kumar`,
+    rollNo: `21ECE${String(i+1).padStart(3,'0')}`,
+    email: `student${i+1}@ptu.ac.in`,
+    selected: i < 5,
+    submitted: i < 3,
+    status: i < 3 ? 'submitted' : i < 5 ? 'selected' : 'pending'
+  }));
+}
+
+function renderStudentsTable(students) {
+  const el = document.getElementById('studentsTable');
+  el.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ROLL NO</th>
+          <th>NAME</th>
+          <th>EMAIL</th>
+          <th>STATUS</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${students.map(s => `
+          <tr>
+            <td style="font-family:var(--font-mono)">${s.rollNo || s.id}</td>
+            <td>${s.name}</td>
+            <td style="font-family:var(--font-mono);font-size:0.8rem;">${s.email}</td>
+            <td><span class="badge badge-${s.status}">${s.status.toUpperCase()}</span></td>
+            <td>
+              <button class="btn-action btn-red" onclick="removeStudent('${s.id}')" style="padding:0.3rem 0.6rem;font-size:0.72rem;">REMOVE</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function showAddStudent() {
+  const name = prompt('Student Name:');
+  const rollNo = prompt('Roll Number:');
+  const email = prompt('Email:');
+  if (!name || !rollNo || !email) return;
+  const student = { id: 'STU_' + Date.now(), name, rollNo, email, status: 'pending', selected: false, submitted: false };
+  API.saveStudent(adminKey, student)
+    .then(() => { showToast('Student added!', 'success'); loadStudents(); })
+    .catch(() => showToast('Failed to add student', 'error'));
+}
+
+function showImportStudents() {
+  const csv = prompt('Paste CSV (name,rollNo,email) one per line:');
+  if (!csv) return;
+  const students = csv.split('\n').map(line => {
+    const [name, rollNo, email] = line.split(',').map(s => s.trim());
+    return { id: 'STU_' + Date.now() + Math.random(), name, rollNo, email, status: 'pending', selected: false, submitted: false };
+  }).filter(s => s.name && s.rollNo);
+  API.importStudents(adminKey, students)
+    .then(() => { showToast(`${students.length} students imported!`, 'success'); loadStudents(); })
+    .catch(() => showToast('Import failed', 'error'));
+}
+
+async function removeStudent(id) {
+  if (!confirm('Remove this student?')) return;
+  try {
+    await API.deleteStudent(adminKey, id);
+    showToast('Student removed', 'success');
+    loadStudents();
+  } catch { showToast('Failed to remove', 'error'); }
+}
+
+// ── RESPONSES ─────────────────────────────────────────
+
+async function loadResponses() {
+  try {
+    const res = await API.getFeedbackFull(adminKey);
+    renderResponsesTable(res.responses || []);
+  } catch {
+    renderResponsesTable(getDemoResponses());
+  }
+}
+
+function getDemoResponses() {
+  return [
+    { anonymousId: 'ANON_001', studentName: 'Ravi Kumar', rollNo: '21ECE001', timestamp: '2024-12-01 10:23', q1: 4, q2: 3 },
+    { anonymousId: 'ANON_002', studentName: 'Priya Singh', rollNo: '21ECE003', timestamp: '2024-12-01 11:05', q1: 5, q2: 5 },
+    { anonymousId: 'ANON_003', studentName: 'Arjun Rao', rollNo: '21ECE007', timestamp: '2024-12-01 12:30', q1: 3, q2: 4 },
+  ];
+}
+
+function renderResponsesTable(responses) {
+  const el = document.getElementById('responsesTable');
+  if (!responses.length) { el.innerHTML = '<p style="color:var(--text-muted);padding:1rem;font-size:0.9rem;">No responses yet.</p>'; return; }
+  el.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ANON ID</th>
+          <th>STUDENT NAME (ADMIN ONLY)</th>
+          <th>ROLL NO</th>
+          <th>SUBMITTED AT</th>
+          <th>Q1 RATING</th>
+          <th>Q2 RATING</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${responses.map(r => `
+          <tr>
+            <td style="font-family:var(--font-mono);color:var(--accent-cyan)">${r.anonymousId}</td>
+            <td style="color:#ff9999;">${r.studentName || '—'}</td>
+            <td style="font-family:var(--font-mono)">${r.rollNo || '—'}</td>
+            <td style="font-family:var(--font-mono);font-size:0.8rem">${r.timestamp}</td>
+            <td>${r.q1 ? '⭐'.repeat(r.q1) : '—'}</td>
+            <td>${r.q2 ? '⭐'.repeat(r.q2) : '—'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function exportResponses() {
+  showToast('Exporting CSV...', 'info');
+  // In real implementation, this would fetch from backend and download CSV
+  const rows = [['Anon ID', 'Student Name', 'Roll No', 'Timestamp', 'Q1', 'Q2']];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'feedback_export.csv'; a.click();
+}
+
+// ── USERS / ACCESS ────────────────────────────────────
+
+async function updatePasswords() {
+  const passwords = {};
+  const ap = document.getElementById('newAdminPass').value;
+  const tp = document.getElementById('newTeacherPass').value;
+  const sp = document.getElementById('newStudentPass').value;
+  if (ap) passwords.admin = ap;
+  if (tp) passwords.teacher = tp;
+  if (sp) passwords.student = sp;
+  if (!Object.keys(passwords).length) { showToast('Enter at least one new password', 'error'); return; }
+  if (!confirm('Update selected passwords? You will need to use new credentials next login.')) return;
+  try {
+    await API.updatePasswords(adminKey, passwords);
+    showToast('Passwords updated successfully!', 'success');
+  } catch { showToast('Failed to update passwords', 'error'); }
+}
+
+async function saveTeacherAccess() {
+  const email = document.getElementById('teacherEmailAccess').value;
+  const name = document.getElementById('teacherName').value;
+  try {
+    await API.updateSettings({ teacherEmail: email, teacherName: name }, adminKey);
+    showToast('Teacher access updated!', 'success');
+  } catch { showToast('Failed', 'error'); }
+}
+
+// ── AUDIT LOG ─────────────────────────────────────────
+
+function loadAuditLog() {
+  const el = document.getElementById('auditLog');
+  const demoLog = [
+    { time: '2024-12-01 09:00', action: 'Form opened by Admin', user: 'admin' },
+    { time: '2024-12-01 09:05', action: 'Max responses set to 30', user: 'admin' },
+    { time: '2024-12-01 09:10', action: 'Random student selection triggered', user: 'admin' },
+    { time: '2024-12-01 10:23', action: 'Feedback submitted (ANON_001)', user: 'system' },
+    { time: '2024-12-01 11:05', action: 'Feedback submitted (ANON_002)', user: 'system' },
+  ];
+  el.innerHTML = `
+    <table class="data-table">
+      <thead><tr><th>TIMESTAMP</th><th>ACTION</th><th>ACTOR</th></tr></thead>
+      <tbody>
+        ${demoLog.map(l => `
+          <tr>
+            <td style="font-family:var(--font-mono);font-size:0.8rem">${l.time}</td>
+            <td style="color:var(--text-secondary)">${l.action}</td>
+            <td><span class="badge badge-${l.user === 'admin' ? 'selected' : 'pending'}">${l.user}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// ── TABS ──────────────────────────────────────────────
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const tabs = ['control','questions','students','responses','users','audit'];
+    b.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === 'tab-' + name);
+  });
+}
+</script>
+</body>
+</html>
