@@ -498,7 +498,17 @@ function loadDemoSettings() {
 async function updateFormStatus() {
   const isOpen = document.getElementById('toggleForm').checked;
   try {
-    await API.updateSettings({ formOpen: isOpen }, adminKey);
+    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateSettings',
+        adminKey: adminKey,
+        settings: { formOpen: isOpen }
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
     const badge = document.getElementById('formStatusBadge');
     badge.textContent = isOpen ? 'FORM OPEN' : 'FORM CLOSED';
     badge.className = 'badge ' + (isOpen ? 'badge-open' : 'badge-closed');
