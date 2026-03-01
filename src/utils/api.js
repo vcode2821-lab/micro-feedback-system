@@ -7,12 +7,13 @@ const API = {
   /**
    * Core POST request to Apps Script
    */
-  async post(action, payload = {}) {
-    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, ...payload })
-    });
+async post(action, payload = {}) {
+  const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action, ...payload })
+  });
     if (!res.ok) throw new Error('Network error: ' + res.status);
     return res.json();
   },
