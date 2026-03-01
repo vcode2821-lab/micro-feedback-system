@@ -6,7 +6,7 @@
 
 const CONFIG = {
   // 🔴 REPLACE THIS with your Google Apps Script Web App URL
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwfAbwDx1EshvZafu5BIv5VZgOQOwlXnSvuUPuXmTzmitSvDK_Q4SltUgSddphwq8w/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxBaCC1AbR_6Pxu7lgnEBxGNeFk1QHb7OsNjUAiaS_Fz2yieZXxaCrmK04Tl-w_5Q_u/exec',
 
   // Default passwords (Admin MUST change via Admin Panel)
   PASSWORDS: {
