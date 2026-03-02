@@ -6,7 +6,7 @@
 
 const CONFIG = {
   // 🔴 REPLACE THIS with your Google Apps Script Web App URL
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxO1Vj_ig6EvyOBHuH-toD62fvcqlqHeeVRNmxTFDvjwZCHtdI4ztG-nbQtQw-lSAnm/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzRHtY8ZsnXLgs9gsfbZPUNs3iYQ2mS9auunEURYvubmMjFMOZQZxaTYo0r8aR0pY_wng/exec',
 
   // Default passwords (Admin MUST change via Admin Panel)
   PASSWORDS: {
@@ -29,3 +29,4 @@ const CONFIG = {
     STUDENT: 'student'
   }
 };
+
