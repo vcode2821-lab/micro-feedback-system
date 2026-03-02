@@ -399,8 +399,8 @@
   <a href="teacher.html">Teacher Dashboard</a>
 </div>
 
-<script src="../../src/utils/config.js"></script>
-<script src="../../src/utils/api.js"></script>
+<script src="../utils/config.js"></script>
+<script src="../utils/api.js"></script>
 <script>
 // ── SESSION ──────────────────────────────────────────
 
@@ -498,17 +498,7 @@ function loadDemoSettings() {
 async function updateFormStatus() {
   const isOpen = document.getElementById('toggleForm').checked;
   try {
-    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'updateSettings',
-        adminKey: adminKey,
-        settings: { formOpen: isOpen }
-      })
-    });
-    const data = await res.json();
-    if (data.success) {
+    await API.updateSettings({ formOpen: isOpen }, adminKey);
     const badge = document.getElementById('formStatusBadge');
     badge.textContent = isOpen ? 'FORM OPEN' : 'FORM CLOSED';
     badge.className = 'badge ' + (isOpen ? 'badge-open' : 'badge-closed');
