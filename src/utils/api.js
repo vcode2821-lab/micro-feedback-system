@@ -1,118 +1,61 @@
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //   ECE FEEDBACK SYSTEM — API LAYER
-//   All communication with Google Apps Script backend
-// ═══════════════════════════════════════════
+//   Uses /api/proxy (Vercel serverless) — NO CORS issues!
+// ═══════════════════════════════════════════════════════
 
 const API = {
-  /**
-   * Core POST request to Apps Script
-   */
+
+  // All requests go through /api/proxy on Vercel
+  PROXY: '/api/proxy',
+
+  // POST request via proxy
   async post(action, payload = {}) {
-    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+    const res = await fetch(this.PROXY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, ...payload })
     });
-    if (!res.ok) throw new Error('Network error: ' + res.status);
+    if (!res.ok) throw new Error('Request failed: ' + res.status);
     return res.json();
   },
 
-  /**
-   * Core GET request to Apps Script
-   */
+  // GET request via proxy
   async get(params = {}) {
-    const url = new URL(CONFIG.APPS_SCRIPT_URL);
+    const url = new URL(this.PROXY, window.location.origin);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     const res = await fetch(url.toString());
-    if (!res.ok) throw new Error('Network error: ' + res.status);
+    if (!res.ok) throw new Error('Request failed: ' + res.status);
     return res.json();
   },
 
-  // ─── SETTINGS ───────────────────────────────────────
+  // ── SETTINGS ──────────────────────────────────────────
+  async getSettings()                        { return this.get({ action: 'getSettings' }); },
+  async updateSettings(settings, adminKey)   { return this.post('updateSettings', { settings, adminKey }); },
 
-  /** Get all settings (form status, limit, deadline, questions) */
-  async getSettings() {
-    return this.get({ action: 'getSettings' });
-  },
+  // ── AUTH ──────────────────────────────────────────────
+  async login(role, password, studentId)     { return this.post('login', { role, password, studentId }); },
 
-  /** Admin: update settings */
-  async updateSettings(settings, adminKey) {
-    return this.post('updateSettings', { settings, adminKey });
-  },
+  // ── STUDENTS ──────────────────────────────────────────
+  async getStudentsFull(adminKey)            { return this.post('getStudentsFull', { adminKey }); },
+  async selectStudents(adminKey, count)      { return this.post('selectStudents', { adminKey, count }); },
+  async resetBatch(adminKey)                 { return this.post('resetBatch', { adminKey }); },
+  async saveStudent(adminKey, student)       { return this.post('saveStudent', { adminKey, student }); },
+  async deleteStudent(adminKey, studentId)   { return this.post('deleteStudent', { adminKey, studentId }); },
+  async importStudents(adminKey, students)   { return this.post('importStudents', { adminKey, students }); },
 
-  // ─── AUTHENTICATION ──────────────────────────────────
+  // ── FEEDBACK ──────────────────────────────────────────
+  async submitFeedback(studentToken, answers){ return this.post('submitFeedback', { studentToken, answers }); },
+  async getFeedbackResults(teacherKey)       { return this.post('getFeedbackResults', { teacherKey }); },
+  async getFeedbackFull(adminKey)            { return this.post('getFeedbackFull', { adminKey }); },
 
-  /** Verify login password for a role */
-  async login(role, password, studentId = null) {
-    return this.post('login', { role, password, studentId });
-  },
+  // ── QUESTIONS ─────────────────────────────────────────
+  async updateQuestions(adminKey, questions) { return this.post('updateQuestions', { adminKey, questions }); },
 
-  // ─── STUDENTS ────────────────────────────────────────
-
-  /** Admin: get full student list with identities */
-  async getStudentsFull(adminKey) {
-    return this.post('getStudentsFull', { adminKey });
-  },
-
-  /** Admin: randomly select students for this round */
-  async selectStudents(adminKey, count) {
-    return this.post('selectStudents', { adminKey, count });
-  },
-
-  /** Admin: reset all students for new batch */
-  async resetBatch(adminKey) {
-    return this.post('resetBatch', { adminKey });
-  },
-
-  /** Admin: add/update a student */
-  async saveStudent(adminKey, student) {
-    return this.post('saveStudent', { adminKey, student });
-  },
-
-  /** Admin: delete a student */
-  async deleteStudent(adminKey, studentId) {
-    return this.post('deleteStudent', { adminKey, studentId });
-  },
-
-  /** Admin: bulk import students */
-  async importStudents(adminKey, students) {
-    return this.post('importStudents', { adminKey, students });
-  },
-
-  // ─── FEEDBACK ────────────────────────────────────────
-
-  /** Student: submit feedback (anonymized server-side) */
-  async submitFeedback(studentToken, answers) {
-    return this.post('submitFeedback', { studentToken, answers });
-  },
-
-  /** Teacher: get anonymized feedback results */
-  async getFeedbackResults(teacherKey) {
-    return this.post('getFeedbackResults', { teacherKey });
-  },
-
-  /** Admin: get full feedback with student identity */
-  async getFeedbackFull(adminKey) {
-    return this.post('getFeedbackFull', { adminKey });
-  },
-
-  // ─── QUESTIONS ───────────────────────────────────────
-
-  /** Admin: update questions list */
-  async updateQuestions(adminKey, questions) {
-    return this.post('updateQuestions', { adminKey, questions });
-  },
-
-  // ─── USERS ───────────────────────────────────────────
-
-  /** Admin: update passwords */
-  async updatePasswords(adminKey, passwords) {
-    return this.post('updatePasswords', { adminKey, passwords });
-  }
+  // ── PASSWORDS ─────────────────────────────────────────
+  async updatePasswords(adminKey, passwords) { return this.post('updatePasswords', { adminKey, passwords }); }
 };
 
-// ─── TOAST NOTIFICATIONS ──────────────────────────────
-
+// ── TOAST NOTIFICATIONS ───────────────────────────────
 function showToast(message, type = 'info', duration = 3500) {
   let toast = document.getElementById('globalToast');
   if (!toast) {
@@ -127,14 +70,14 @@ function showToast(message, type = 'info', duration = 3500) {
   toast._timer = setTimeout(() => toast.classList.remove('show'), duration);
 }
 
-// ─── SESSION HELPERS ──────────────────────────────────
-
+// ── SESSION HELPERS ───────────────────────────────────
 const Session = {
-  set(key, val) { sessionStorage.setItem(key, val); },
-  get(key) { return sessionStorage.getItem(key); },
-  clear(key) { sessionStorage.removeItem(key); },
-  clearAll() { sessionStorage.clear(); },
-  isAuth(key) { return !!sessionStorage.getItem(key); }
+  set(key, val)  { sessionStorage.setItem(key, val); },
+  get(key)       { return sessionStorage.getItem(key); },
+  clear(key)     { sessionStorage.removeItem(key); },
+  clearAll()     { sessionStorage.clear(); },
+  isAuth(key)    { return !!sessionStorage.getItem(key); }
 };
+
 
 
