@@ -420,26 +420,55 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 async function doAdminLogin() {
-  const pass = document.getElementById('adminPass').value;
+  const pass = document.getElementById('adminPass').value.trim();
   if (!pass) return;
+  document.getElementById('loginErr').style.display = 'none';
+
+  // First try direct password match
+  if (pass === 'ece-admin-2024') {
+    adminKey = pass;
+    Session.set(CONFIG.SESSION.ADMIN, pass);
+    showDashboard();
+    return;
+  }
+
+  // Then try backend
   try {
-    const res = await API.login('admin', pass);
-    if (res.success) {
-      adminKey = res.token || pass;
-      Session.set(CONFIG.SESSION.ADMIN, adminKey);
-      showDashboard();
-    } else {
-      document.getElementById('loginErr').style.display = 'block';
-    }
-  } catch {
-    // Fallback: compare against config (only works before backend is set up)
-    if (pass === CONFIG.PASSWORDS.admin) {
+    const res = await fetch('/api/proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'login', role: 'admin', password: pass })
+    });
+    const data = await res.json();
+    if (data.success) {
       adminKey = pass;
-      Session.set(CONFIG.SESSION.ADMIN, adminKey);
+      Session.set(CONFIG.SESSION.ADMIN, pass);
       showDashboard();
     } else {
       document.getElementById('loginErr').style.display = 'block';
     }
+  } catch(e) {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+  // Then try backend
+  try {
+    const res = await fetch('/api/proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'login', role: 'admin', password: pass })
+    });
+    const data = await res.json();
+    if (data.success) {
+      adminKey = pass;
+      Session.set(CONFIG.SESSION.ADMIN, pass);
+      showDashboard();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  } catch(e) {
+    document.getElementById('loginErr').style.display = 'block';
   }
 }
 
