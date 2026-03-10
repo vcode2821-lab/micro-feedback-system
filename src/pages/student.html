@@ -294,7 +294,7 @@ async function doStudentLogin() {
   document.getElementById('loginErr').style.display = 'none';
 
   // First check password matches
-  if (pass === 'ece-student-2024') {
+  if (pass !== 'ece-student-2024') {
     document.getElementById('loginErr').textContent = 'Invalid password.';
     document.getElementById('loginErr').style.display = 'block';
     return;
@@ -327,11 +327,18 @@ async function doStudentLogin() {
 
 function handleLoginError(reason) {
   const el = document.getElementById('loginErr');
-  if (reason === 'not_selected') el.textContent = 'You were not selected for this feedback round.';
-  else if (reason === 'already_submitted') el.textContent = 'You have already submitted feedback this round.';
-  else if (reason === 'form_closed') el.textContent = 'Feedback form is currently closed.';
-  else el.textContent = 'Invalid credentials. Please check your ID and password.';
   el.style.display = 'block';
+  if (reason === 'not_selected') {
+    el.textContent = 'You were not selected for this feedback round.';
+  } else if (reason === 'already_submitted') {
+    el.textContent = 'You have already submitted feedback this round.';
+  } else if (reason === 'form_closed') {
+    el.textContent = 'Feedback form is currently closed.';
+  } else if (reason === 'not_found') {
+    el.textContent = 'Student ID not found. Please check your Roll Number.';
+  } else {
+    el.textContent = 'Invalid credentials. Please check your ID and password.';
+  }
 }
 
 function doLogout() {
