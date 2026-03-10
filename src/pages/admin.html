@@ -452,25 +452,7 @@ async function doAdminLogin() {
   }
 }
 
-  // Then try backend
-  try {
-    const res = await fetch('/api/proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'login', role: 'admin', password: pass })
-    });
-    const data = await res.json();
-    if (data.success) {
-      adminKey = pass;
-      Session.set(CONFIG.SESSION.ADMIN, pass);
-      showDashboard();
-    } else {
-      document.getElementById('loginErr').style.display = 'block';
-    }
-  } catch(e) {
-    document.getElementById('loginErr').style.display = 'block';
-  }
-}
+
 
 function doLogout() {
   Session.clear(CONFIG.SESSION.ADMIN);
