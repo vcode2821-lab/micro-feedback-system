@@ -294,7 +294,7 @@ async function doStudentLogin() {
   document.getElementById('loginErr').style.display = 'none';
 
   // First check password matches
-  if (pass !== 'ece-student-2024') {
+  if (pass === 'ece-student-2024') {
     document.getElementById('loginErr').textContent = 'Invalid password.';
     document.getElementById('loginErr').style.display = 'block';
     return;
