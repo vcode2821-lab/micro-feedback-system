@@ -6,7 +6,7 @@
 
 const CONFIG = {
   // 🔴 REPLACE THIS with your Google Apps Script Web App URL
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwfhXWLWtFVneS69ceNcoHxZvtV5ccnC7GFTVfcpG5dUWik6vt5z2s7B1Y-dYIAyay3vg/exec',
+  APPS_SCRIPT_URL: '/api/proxy',
 
   // Default passwords (Admin MUST change via Admin Panel)
   PASSWORDS: {
