@@ -1,8 +1,6 @@
 {
   "version": 2,
-  "name": "ece-feedback-system",
-  "public": false,
-  "github": {
-    "silent": true
-  }
+  "rewrites": [
+    { "source": "/api/proxy", "destination": "/api/proxy" }
+  ]
 }
