@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   // 🔴 PASTE YOUR APPS SCRIPT URL HERE
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx01Vj_ig6EvyOBHuH-toD62fvcqlqHeeVRNmxTFDvjwZCHtdI4ztG-nbQtQw-lSAnm/exec';
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfhXWLWtFVneS69ceNcoHxZvtV5ccnC7GFTVfcpG5dUWik6vt5z2s7B1Y-dYIAyay3vg/exec';
 
   try {
     if (req.method === 'GET') {
