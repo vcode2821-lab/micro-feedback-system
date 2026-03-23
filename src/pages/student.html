@@ -289,44 +289,29 @@ window.addEventListener('DOMContentLoaded', () => {
 
 async function doStudentLogin() {
   const id = document.getElementById('studentId').value.trim();
-  const pass = document.getElementById('studentPass').value.trim();
+  const pass = document.getElementById('studentPass').value;
   if (!id || !pass) return;
   document.getElementById('loginErr').style.display = 'none';
-
-  // Check password first
-  if (pass !== 'ece-student-2024') {
-    document.getElementById('loginErr').textContent = 'Wrong password. Use: ece-student-2024';
-    document.getElementById('loginErr').style.display = 'block';
-    return;
-  }
-
-  // Try backend
   try {
-    const res = await fetch('/api/proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'login',
-        role: 'student',
-        password: pass,
-        studentId: id
-      })
-    });
-    const data = await res.json();
-    if (data.success) {
-      studentToken = data.token || ('DEMO_' + id);
+    const res = await API.login('student', pass, id);
+    if (res.success) {
+      studentToken = res.token;
       Session.set(CONFIG.SESSION.STUDENT, studentToken);
       Session.set(CONFIG.SESSION.STUDENT_ID, id);
       showDashboard();
     } else {
-      handleLoginError(data.reason);
+      handleLoginError(res.reason);
     }
-  } catch(e) {
-    // If backend fails — still let student in
-    studentToken = 'DEMO_' + id + '_' + Date.now();
-    Session.set(CONFIG.SESSION.STUDENT, studentToken);
-    Session.set(CONFIG.SESSION.STUDENT_ID, id);
-    showDashboard();
+  } catch {
+    // Demo fallback
+    if (pass === CONFIG.PASSWORDS.student) {
+      studentToken = 'DEMO_' + id + '_' + Date.now();
+      Session.set(CONFIG.SESSION.STUDENT, studentToken);
+      Session.set(CONFIG.SESSION.STUDENT_ID, id);
+      showDashboard();
+    } else {
+      handleLoginError('wrong_password');
+    }
   }
 }
 function handleLoginError(reason) {
