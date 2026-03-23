@@ -293,41 +293,18 @@ async function doStudentLogin() {
   if (!id || !pass) return;
   document.getElementById('loginErr').style.display = 'none';
 
-  // Check password first
+  // Wrong password — reject immediately
   if (pass !== 'ece-student-2024') {
-    document.getElementById('loginErr').textContent = 'Wrong password. Use: ece-student-2024';
+    document.getElementById('loginErr').textContent = 'Wrong password.';
     document.getElementById('loginErr').style.display = 'block';
     return;
   }
 
-  // Try backend
-  try {
-    const res = await fetch('/api/proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'login',
-        role: 'student',
-        password: pass,
-        studentId: id
-      })
-    });
-    const data = await res.json();
-    if (data.success) {
-      studentToken = data.token || ('DEMO_' + id);
-      Session.set(CONFIG.SESSION.STUDENT, studentToken);
-      Session.set(CONFIG.SESSION.STUDENT_ID, id);
-      showDashboard();
-    } else {
-      handleLoginError(data.reason);
-    }
-  } catch(e) {
-    // If backend fails — still let student in
-    studentToken = 'DEMO_' + id + '_' + Date.now();
-    Session.set(CONFIG.SESSION.STUDENT, studentToken);
-    Session.set(CONFIG.SESSION.STUDENT_ID, id);
-    showDashboard();
-  }
+  // Correct password — let student in directly
+  studentToken = 'STU_' + id + '_' + Date.now();
+  Session.set(CONFIG.SESSION.STUDENT, studentToken);
+  Session.set(CONFIG.SESSION.STUDENT_ID, id);
+  showDashboard();
 }
 function handleLoginError(reason) {
   const el = document.getElementById('loginErr');
@@ -361,31 +338,27 @@ async function showDashboard() {
 
 async function loadFormState() {
   try {
-    const settings = await API.getSettings();
+    const res = await fetch('/api/proxy?action=getSettings');
+    const settings = await res.json();
+
     if (!settings.formOpen) {
-      showScreen('formClosedScreen'); return;
+      showScreen('formClosedScreen');
+      return;
     }
-    // Check if student is selected
-    if (settings.studentStatus === 'not_selected') {
-      showScreen('notSelectedScreen'); return;
-    }
-    if (settings.studentStatus === 'submitted') {
-      showScreen('alreadySubmittedScreen'); return;
-    }
-    // Load form
+
     currentQuestions = settings.questions || getDemoQuestions();
     deadline = settings.deadline;
     showScreen('feedbackFormSection');
     renderForm();
     if (deadline) startCountdown();
-  } catch {
-    // Demo: show form directly
+
+  } catch(e) {
+    // Backend unavailable — show form with demo questions
     currentQuestions = getDemoQuestions();
     showScreen('feedbackFormSection');
     renderForm();
   }
 }
-
 function getDemoQuestions() {
   return [
     { id: 'q1', type: 'rating', text: 'How would you rate the overall teaching quality of this subject?', required: true },
